@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.web.quartz.dao.MemberGroupDAO">
+    
+	<resultMap id="MemberGroupDO" type="org.web.quartz.domain.MemberGroupDO">
+        <id column="MEMBER_GROUP_ID" property="memberGroupId"/>
+        <result column="JOB_GROUP" property="jobGroup"/>
+        <result column="MEMBER_ID" property="memberId"/>
+        <result column="MEMBER_NAME" property="memberName"/>
+        <result column="REASON" property="reason"/>
+        <result column="INPUT_USER" property="inputUser"/>
+        <result column="UPDATE_USER" property="updateUser"/>
+        <result column="INPUT_DATE" property="inputDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="UPDATE_VERSION" property="updateVersion"/>
+        <result column="IS_DELETE" property="isDelete"/>
+    </resultMap>
+
+    <sql id="all_columns">
+		MEMBER_GROUP_ID,JOB_GROUP,MEMBER_ID,MEMBER_NAME,REASON,INPUT_USER,UPDATE_USER,INPUT_DATE,UPDATE_DATE,UPDATE_VERSION,IS_DELETE    
+	</sql>
+
+    <sql id="query_condition">
+        <if test="memberGroupId != null "><![CDATA[ AND MEMBER_GROUP_ID = #{memberGroupId}]]></if>
+        <if test="memberGroupIdList != null ">
+			AND MEMBER_GROUP_ID IN 
+			<foreach close=")" collection="memberGroupIdList" index="index" item="item" open="(" separator=","> 
+			#{item} 
+			</foreach>
+        </if>
+        <if test="jobGroup != null "><![CDATA[ AND JOB_GROUP = #{jobGroup}]]></if>
+        <if test="memberId != null "><![CDATA[ AND MEMBER_ID = #{memberId}]]></if>
+        <if test="memberIdList != null ">
+			AND MEMBER_ID IN 
+			<foreach close=")" collection="memberIdList" index="index" item="item" open="(" separator=","> 
+			#{item} 
+			</foreach>
+        </if>
+        <if test="memberName != null "><![CDATA[ AND MEMBER_NAME = #{memberName}]]></if>
+        <if test="inputUser != null "><![CDATA[ AND INPUT_USER = #{inputUser}]]></if>
+        <if test="updateUser != null "><![CDATA[ AND UPDATE_USER = #{updateUser}]]></if>
+        <if test="lessThanInputDate != null "><![CDATA[ AND INPUT_DATE < #{lessThanInputDate}]]></if>
+        <if test="equalAndLessThanInputDate != null "><![CDATA[ AND INPUT_DATE <= #{equalAndLessThanInputDate}]]></if>
+        <if test="moreThanInputDate != null "><![CDATA[ AND INPUT_DATE > #{moreThanInputDate}]]></if>
+        <if test="equalAndMoreThanInputDate != null "><![CDATA[ AND INPUT_DATE >= #{equalAndMoreThanInputDate}]]></if>
+        <if test="lessThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE < #{lessThanUpdateDate}]]></if>
+        <if test="equalAndLessThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE <= #{equalAndLessThanUpdateDate}]]></if>
+        <if test="moreThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE > #{moreThanUpdateDate}]]></if>
+        <if test="equalAndMoreThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE >= #{equalAndMoreThanUpdateDate}]]></if>
+        <if test="updateVersion != null "><![CDATA[ AND UPDATE_VERSION = #{updateVersion}]]></if>
+        <if test="isDelete != null "><![CDATA[ AND IS_DELETE = #{isDelete}]]></if>
+    </sql>
+
+    <insert id="insertMemberGroup" keyProperty="memberGroupId" parameterType="org.web.quartz.domain.MemberGroupDO" useGeneratedKeys="true">
+		INSERT INTO MEMBER_GROUP (<include refid="all_columns"/>) VALUES
+		(
+		#{memberGroupId},#{jobGroup},#{memberId},#{memberName},#{reason},#{inputUser},#{updateUser},#{inputDate},#{updateDate},#{updateVersion},#{isDelete}		
+		)
+    </insert>
+
+    <select id="queryMemberGroupList" parameterType="org.web.quartz.query.QueryMemberGroupDO" resultMap="MemberGroupDO">
+        SELECT <include refid="all_columns"/> FROM MEMBER_GROUP
+		<where>
+            <include refid="query_condition"/>
+        </where>
+        <if test="orderByClause !=null"> ORDER BY ${orderByClause}</if>
+        <!-- add order or query info. -->
+		<![CDATA[
+
+		]]>
+		<if test="startNum != null"> LIMIT #{startNum},#{pageSize}</if>
+    </select>
+
+    <select id="countMemberGroupList" parameterType="org.web.quartz.query.QueryMemberGroupDO" resultType="int">
+		SELECT COUNT(1) FROM MEMBER_GROUP
+		<where>
+            <include refid="query_condition"/>
+        </where>
+        <!-- add order or query info. -->
+		<![CDATA[
+
+		]]>
+	</select>
+
+    <select id="queryMemberGroupByMemberGroupId" parameterType="long" resultMap="MemberGroupDO">
+        SELECT <include refid="all_columns"/> FROM MEMBER_GROUP WHERE MEMBER_GROUP_ID = #{memberGroupId}
+    </select>
+
+    <update id="updateMemberGroupByMemberGroupId" parameterType="org.web.quartz.domain.MemberGroupDO">
+        UPDATE MEMBER_GROUP
+        <set>
+            <if test="jobGroup!=null"><![CDATA[JOB_GROUP=#{jobGroup},]]></if>
+            <if test="memberId!=null"><![CDATA[MEMBER_ID=#{memberId},]]></if>
+            <if test="memberName!=null"><![CDATA[MEMBER_NAME=#{memberName},]]></if>
+            <if test="reason!=null"><![CDATA[REASON=#{reason},]]></if>
+            <if test="inputUser!=null"><![CDATA[INPUT_USER=#{inputUser},]]></if>
+            <if test="updateUser!=null"><![CDATA[UPDATE_USER=#{updateUser},]]></if>
+            <if test="inputDate!=null"><![CDATA[INPUT_DATE=#{inputDate},]]></if>
+            <if test="updateDate!=null"><![CDATA[UPDATE_DATE=#{updateDate},]]></if>
+            <if test="updateVersion!=null"><![CDATA[UPDATE_VERSION=#{updateVersion},]]></if>
+            <if test="isDelete!=null"><![CDATA[IS_DELETE=#{isDelete},]]></if>
+        </set>
+		<![CDATA[ WHERE MEMBER_GROUP_ID = #{memberGroupId}]]>
+		<if test="updateVersion != null "><![CDATA[ and updateVersion = #{updateVersion} ]]></if>
+    </update>
+
+</mapper>
+
+

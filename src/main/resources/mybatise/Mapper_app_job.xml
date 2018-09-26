@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.web.quartz.dao.AppJobDAO">
+    
+	<resultMap id="AppJobDO" type="org.web.quartz.domain.AppJobDO">
+        <id column="APP_JOB_ID" property="appJobId"/>
+        <result column="JOB_NAME" property="jobName"/>
+        <result column="JOB_GROUP" property="jobGroup"/>
+        <result column="URI" property="uri"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="NOTICE_ERROR_URI" property="noticeErrorUri"/>
+        <result column="NEED_LOG" property="needLog"/>        
+        <result column="MAP_DATA" property="mapData"/>
+        <result column="TRIGGER_TYPE" property="triggerType"/>
+        <result column="REQUEST_WAY" property="requestWay"/>
+        <result column="STATUS" property="status"/>
+        <result column="CRON" property="cron"/>
+        <result column="REPEAT_COUNT" property="repeatCount"/>
+        <result column="REPEAT_INTERVAL" property="repeatInterval"/>
+        <result column="START_TIME" property="startTime"/>
+        <result column="END_TIME" property="endTime"/>
+        <result column="REASON" property="reason"/>
+        <result column="INPUT_USER" property="inputUser"/>
+        <result column="UPDATE_USER" property="updateUser"/>
+        <result column="INPUT_DATE" property="inputDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="UPDATE_VERSION" property="updateVersion"/>
+        <result column="IS_DELETE" property="isDelete"/>
+    </resultMap>
+
+    <sql id="all_columns">
+		APP_JOB_ID,JOB_NAME,JOB_GROUP,URI,DESCRIPTION,NOTICE_ERROR_URI,NEED_LOG,MAP_DATA,TRIGGER_TYPE,REQUEST_WAY,STATUS,CRON,REPEAT_COUNT,REPEAT_INTERVAL,START_TIME,END_TIME,REASON,INPUT_USER,UPDATE_USER,INPUT_DATE,UPDATE_DATE,UPDATE_VERSION,IS_DELETE    
+	</sql>
+
+    <sql id="query_condition">
+        <if test="appJobId != null "><![CDATA[ AND APP_JOB_ID = #{appJobId}]]></if>
+        <if test="appJobIdList != null ">
+			AND APP_JOB_ID IN 
+			<foreach close=")" collection="appJobIdList" index="index" item="item" open="(" separator=","> 
+			#{item} 
+			</foreach>
+        </if>
+        <if test="jobName != null "><![CDATA[ AND JOB_NAME = #{jobName}]]></if>
+        <if test="indistinctJobName != null "><![CDATA[ AND JOB_NAME LIKE concat(concat('%',#{indistinctJobName}),'%')]]></if>
+        <if test="jobNameList != null ">
+			AND JOB_NAME IN 
+			<foreach close=")" collection="jobNameList" index="index" item="item" open="(" separator=","> 
+			#{item} 
+			</foreach>
+        </if>
+        <if test="jobGroup != null "><![CDATA[ AND JOB_GROUP = #{jobGroup}]]></if>
+        <if test="jobGroupList != null ">
+			AND JOB_GROUP IN 
+			<foreach close=")" collection="jobGroupList" index="index" item="item" open="(" separator=","> 
+			#{item} 
+			</foreach>
+        </if>        
+        <if test="uri != null "><![CDATA[ AND URI = #{uri}]]></if>
+        <if test="indistinctUri != null "><![CDATA[ AND URI LIKE concat(concat('%',#{indistinctUri}),'%')]]></if>
+        <if test="indistinctDescription != null "><![CDATA[ AND DESCRIPTION LIKE concat(concat('%',#{indistinctDescription}),'%')]]></if>
+        <if test="triggerType != null "><![CDATA[ AND TRIGGER_TYPE = #{triggerType}]]></if>
+        <if test="triggerTypeList != null ">
+			AND TRIGGER_TYPE IN 
+			<foreach close=")" collection="triggerTypeList" index="index" item="item" open="(" separator=","> 
+			#{item} 
+			</foreach>
+        </if>
+        <if test="requestWay != null "><![CDATA[ AND REQUEST_WAY = #{requestWay}]]></if>
+        <if test="requestWayList != null ">
+			AND REQUEST_WAY IN 
+			<foreach close=")" collection="requestWayList" index="index" item="item" open="(" separator=","> 
+			#{item} 
+			</foreach>
+        </if>
+        <if test="status != null "><![CDATA[ AND STATUS = #{status}]]></if>
+        <if test="statusList != null ">
+			AND STATUS IN 
+			<foreach close=")" collection="statusList" index="index" item="item" open="(" separator=","> 
+			#{item} 
+			</foreach>
+        </if>
+        <if test="lessThanStartTime != null "><![CDATA[ AND START_TIME < #{lessThanStartTime}]]></if>
+        <if test="equalAndLessThanStartTime != null "><![CDATA[ AND START_TIME <= #{equalAndLessThanStartTime}]]></if>
+        <if test="moreThanStartTime != null "><![CDATA[ AND START_TIME > #{moreThanStartTime}]]></if>
+        <if test="equalAndMoreThanStartTime != null "><![CDATA[ AND START_TIME >= #{equalAndMoreThanStartTime}]]></if>
+        <if test="lessThanEndTime != null "><![CDATA[ AND END_TIME < #{lessThanEndTime}]]></if>
+        <if test="equalAndLessThanEndTime != null "><![CDATA[ AND END_TIME <= #{equalAndLessThanEndTime}]]></if>
+        <if test="moreThanEndTime != null "><![CDATA[ AND END_TIME > #{moreThanEndTime}]]></if>
+        <if test="equalAndMoreThanEndTime != null "><![CDATA[ AND END_TIME >= #{equalAndMoreThanEndTime}]]></if>
+        <if test="inputUser != null "><![CDATA[ AND INPUT_USER = #{inputUser}]]></if>
+        <if test="updateUser != null "><![CDATA[ AND UPDATE_USER = #{updateUser}]]></if>
+        <if test="lessThanInputDate != null "><![CDATA[ AND INPUT_DATE < #{lessThanInputDate}]]></if>
+        <if test="equalAndLessThanInputDate != null "><![CDATA[ AND INPUT_DATE <= #{equalAndLessThanInputDate}]]></if>
+        <if test="moreThanInputDate != null "><![CDATA[ AND INPUT_DATE > #{moreThanInputDate}]]></if>
+        <if test="equalAndMoreThanInputDate != null "><![CDATA[ AND INPUT_DATE >= #{equalAndMoreThanInputDate}]]></if>
+        <if test="lessThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE < #{lessThanUpdateDate}]]></if>
+        <if test="equalAndLessThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE <= #{equalAndLessThanUpdateDate}]]></if>
+        <if test="moreThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE > #{moreThanUpdateDate}]]></if>
+        <if test="equalAndMoreThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE >= #{equalAndMoreThanUpdateDate}]]></if>
+        <if test="updateVersion != null "><![CDATA[ AND UPDATE_VERSION = #{updateVersion}]]></if>
+        <if test="isDelete != null "><![CDATA[ AND IS_DELETE = #{isDelete}]]></if>
+    </sql>
+
+    <insert id="insertAppJob" keyProperty="appJobId" parameterType="org.web.quartz.domain.AppJobDO" useGeneratedKeys="true">
+		INSERT INTO app_job (<include refid="all_columns"/>) VALUES
+		(
+		#{appJobId},#{jobName},#{jobGroup},#{uri},#{description},#{noticeErrorUri},#{needLog},#{mapData},#{triggerType},#{requestWay},#{status},#{cron},#{repeatCount},#{repeatInterval},#{startTime},#{endTime},#{reason},#{inputUser},#{updateUser},#{inputDate},#{updateDate},#{updateVersion},#{isDelete}		
+		)
+    </insert>
+
+    <select id="queryAppJobList" parameterType="org.web.quartz.query.QueryAppJobDO" resultMap="AppJobDO">
+        SELECT <include refid="all_columns"/> FROM app_job
+		<where>
+            <include refid="query_condition"/>
+        </where>
+        <if test="orderByClause !=null"> ORDER BY ${orderByClause}</if>
+        <!-- add order or query info. -->
+		<![CDATA[
+
+		]]>
+		<if test="startNum != null"> LIMIT #{startNum},#{pageSize}</if>
+    </select>
+
+    <select id="countAppJobList" parameterType="org.web.quartz.query.QueryAppJobDO" resultType="int">
+		SELECT COUNT(1) FROM app_job
+		<where>
+            <include refid="query_condition"/>
+        </where>
+        <!-- add order or query info. -->
+		<![CDATA[
+
+		]]>
+	</select>
+
+    <select id="queryAppJobByAppJobId" parameterType="int" resultMap="AppJobDO">
+        SELECT <include refid="all_columns"/> FROM app_job WHERE APP_JOB_ID = #{appJobId}
+    </select>
+
+    <update id="updateAppJobByAppJobId" parameterType="org.web.quartz.domain.AppJobDO">
+        UPDATE app_job
+        <set>
+            <if test="jobName!=null"><![CDATA[JOB_NAME=#{jobName},]]></if>
+            <if test="jobGroup!=null"><![CDATA[JOB_GROUP=#{jobGroup},]]></if>
+            <if test="uri!=null"><![CDATA[URI=#{uri},]]></if>
+            <if test="description!=null"><![CDATA[DESCRIPTION=#{description},]]></if>
+            <if test="noticeErrorUri!=null"><![CDATA[NOTICE_ERROR_URI=#{noticeErrorUri},]]></if>
+            <if test="needLog!=null"><![CDATA[NEED_LOG=#{needLog},]]></if>
+            <if test="mapData!=null"><![CDATA[MAP_DATA=#{mapData},]]></if>
+            <if test="triggerType!=null"><![CDATA[TRIGGER_TYPE=#{triggerType},]]></if>
+            <if test="requestWay!=null"><![CDATA[REQUEST_WAY=#{requestWay},]]></if>
+            <if test="status!=null"><![CDATA[STATUS=#{status},]]></if>
+            <if test="cron!=null"><![CDATA[CRON=#{cron},]]></if>
+            <if test="repeatCount!=null"><![CDATA[REPEAT_COUNT=#{repeatCount},]]></if>
+            <if test="repeatInterval!=null"><![CDATA[REPEAT_INTERVAL=#{repeatInterval},]]></if>
+            <if test="startTime!=null"><![CDATA[START_TIME=#{startTime},]]></if>
+            <if test="endTime!=null"><![CDATA[END_TIME=#{endTime},]]></if>
+            <if test="reason!=null"><![CDATA[REASON=#{reason},]]></if>
+            <if test="inputUser!=null"><![CDATA[INPUT_USER=#{inputUser},]]></if>
+            <if test="updateUser!=null"><![CDATA[UPDATE_USER=#{updateUser},]]></if>
+            <if test="inputDate!=null"><![CDATA[INPUT_DATE=#{inputDate},]]></if>
+            <if test="updateDate!=null"><![CDATA[UPDATE_DATE=#{updateDate},]]></if>
+            <if test="updateVersion!=null"><![CDATA[UPDATE_VERSION=#{updateVersion},]]></if>
+            <if test="isDelete!=null"><![CDATA[IS_DELETE=#{isDelete},]]></if>
+        </set>
+		<![CDATA[ WHERE APP_JOB_ID = #{appJobId}]]>
+		<if test="updateVersion != null "><![CDATA[ and updateVersion = #{updateVersion} ]]></if>
+    </update>
+
+</mapper>
+
+

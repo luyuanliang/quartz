@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.web.quartz.dao.MemberDAO">
+    
+	<resultMap id="MemberDO" type="org.web.quartz.domain.MemberDO">
+        <id column="MEMBER_ID" property="memberId"/>
+        <result column="MEMBER_NAME" property="memberName"/>
+        <result column="ROLE" property="role"/>
+        <result column="PASS_WORD" property="passWord"/>
+        <result column="REASON" property="reason"/>
+        <result column="INPUT_DATE" property="inputDate"/>
+        <result column="UPDATE_DATE" property="updateDate"/>
+        <result column="UPDATE_VERSION" property="updateVersion"/>
+        <result column="IS_DELETE" property="isDelete"/>
+    </resultMap>
+
+    <sql id="all_columns">
+		MEMBER_ID,MEMBER_NAME,ROLE,PASS_WORD,REASON,INPUT_DATE,UPDATE_DATE,UPDATE_VERSION,IS_DELETE    
+	</sql>
+
+    <sql id="query_condition">
+        <if test="memberId != null "><![CDATA[ AND MEMBER_ID = #{memberId}]]></if>
+        <if test="memberIdList != null ">
+			AND MEMBER_ID IN 
+			<foreach close=")" collection="memberIdList" index="index" item="item" open="(" separator=","> 
+			#{item} 
+			</foreach>
+        </if>
+        <if test="memberName != null "><![CDATA[ AND MEMBER_NAME = #{memberName}]]></if>
+        <if test="indistinctMemberName != null "><![CDATA[ AND MEMBER_NAME LIKE concat(concat('%',#{indistinctMemberName}),'%')]]></if>
+        <if test="role != null "><![CDATA[ AND ROLE = #{role}]]></if>
+        <if test="roleList != null ">
+			AND ROLE IN 
+			<foreach close=")" collection="roleList" index="index" item="item" open="(" separator=","> 
+			#{item} 
+			</foreach>
+        </if>
+        <if test="passWord != null "><![CDATA[ AND PASS_WORD = #{passWord}]]></if>
+        <if test="reason != null "><![CDATA[ AND REASON = #{reason}]]></if>
+        <if test="lessThanInputDate != null "><![CDATA[ AND INPUT_DATE < #{lessThanInputDate}]]></if>
+        <if test="equalAndLessThanInputDate != null "><![CDATA[ AND INPUT_DATE <= #{equalAndLessThanInputDate}]]></if>
+        <if test="moreThanInputDate != null "><![CDATA[ AND INPUT_DATE > #{moreThanInputDate}]]></if>
+        <if test="equalAndMoreThanInputDate != null "><![CDATA[ AND INPUT_DATE >= #{equalAndMoreThanInputDate}]]></if>
+        <if test="lessThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE < #{lessThanUpdateDate}]]></if>
+        <if test="equalAndLessThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE <= #{equalAndLessThanUpdateDate}]]></if>
+        <if test="moreThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE > #{moreThanUpdateDate}]]></if>
+        <if test="equalAndMoreThanUpdateDate != null "><![CDATA[ AND UPDATE_DATE >= #{equalAndMoreThanUpdateDate}]]></if>
+        <if test="updateVersion != null "><![CDATA[ AND UPDATE_VERSION = #{updateVersion}]]></if>
+        <if test="isDelete != null "><![CDATA[ AND IS_DELETE = #{isDelete}]]></if>
+    </sql>
+
+    <insert id="insertMember" keyProperty="memberId" parameterType="org.web.quartz.domain.MemberDO" useGeneratedKeys="true">
+		INSERT INTO member (<include refid="all_columns"/>) VALUES
+		(
+		#{memberId},#{memberName},#{role},#{passWord},#{reason},#{inputDate},#{updateDate},#{updateVersion},#{isDelete}		
+		)
+    </insert>
+
+    <select id="queryMemberList" parameterType="org.web.quartz.query.QueryMemberDO" resultMap="MemberDO">
+        SELECT <include refid="all_columns"/> FROM member
+		<where>
+            <include refid="query_condition"/>
+        </where>
+        <if test="orderByClause !=null"> ORDER BY ${orderByClause}</if>
+        <!-- add order or query info. -->
+		<![CDATA[
+
+		]]>
+		<if test="startNum != null"> LIMIT #{startNum},#{pageSize}</if>
+    </select>
+
+    <select id="countMemberList" parameterType="org.web.quartz.query.QueryMemberDO" resultType="int">
+		SELECT COUNT(1) FROM member
+		<where>
+            <include refid="query_condition"/>
+        </where>
+        <!-- add order or query info. -->
+		<![CDATA[
+
+		]]>
+	</select>
+
+    <select id="queryMemberByMemberId" parameterType="long" resultMap="MemberDO">
+        SELECT <include refid="all_columns"/> FROM member WHERE MEMBER_ID = #{memberId}
+    </select>
+
+    <update id="updateMemberByMemberId" parameterType="org.web.quartz.domain.MemberDO">
+        UPDATE member
+        <set>
+            <if test="memberName!=null"><![CDATA[MEMBER_NAME=#{memberName},]]></if>
+            <if test="role!=null"><![CDATA[ROLE=#{role},]]></if>
+            <if test="passWord!=null"><![CDATA[PASS_WORD=#{passWord},]]></if>
+            <if test="reason!=null"><![CDATA[REASON=#{reason},]]></if>
+            <if test="inputDate!=null"><![CDATA[INPUT_DATE=#{inputDate},]]></if>
+            <if test="updateDate!=null"><![CDATA[UPDATE_DATE=#{updateDate},]]></if>
+            <if test="updateVersion!=null"><![CDATA[UPDATE_VERSION=#{updateVersion},]]></if>
+            <if test="isDelete!=null"><![CDATA[IS_DELETE=#{isDelete},]]></if>
+        </set>
+		<![CDATA[ WHERE MEMBER_ID = #{memberId}]]>
+		<if test="updateVersion != null "><![CDATA[ and updateVersion = #{updateVersion} ]]></if>
+    </update>
+
+</mapper>
+
+

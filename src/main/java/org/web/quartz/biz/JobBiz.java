@@ -1,10 +1,6 @@
 package org.web.quartz.biz;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
+import com.google.gson.Gson;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.quartz.JobExecutionContext;
@@ -12,7 +8,7 @@ import org.quartz.Scheduler;
 import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.stereotype.Service;
 import org.web.exception.ServiceException;
-import org.web.helper.ExceptionHelper;
+import org.web.helper.ServiceExceptionHelper;
 import org.web.helper.HttpHelper;
 import org.web.quartz.domain.AppJobDO;
 import org.web.quartz.domain.AppJobEnum.HTTP_WAY;
@@ -22,7 +18,9 @@ import org.web.quartz.domain.ResultHistoryDO;
 import org.web.quartz.service.AppJobService;
 import org.web.quartz.service.ResultHistoryService;
 
-import com.google.gson.Gson;
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service("jobBiz")
 public class JobBiz {
@@ -77,11 +75,11 @@ public class JobBiz {
 		} catch (ServiceException e) {
 			resultHistoryDO.setSuccess("false");
 			resultHistoryDO.setBody("访问URI异常, URI is " + appJobDO.getUri());
-			logger.error(ExceptionHelper.getExceptionInfo(e));
+			logger.error(ServiceExceptionHelper.getExceptionInfo(e));
 		} catch (Exception e) {
 			resultHistoryDO.setSuccess("false");
 			resultHistoryDO.setBody("系统异常");
-			logger.error(ExceptionHelper.getExceptionInfo(e));
+			logger.error(ServiceExceptionHelper.getExceptionInfo(e));
 		}
 
 		if (step == 1) {

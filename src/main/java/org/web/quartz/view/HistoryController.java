@@ -17,7 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.web.helper.ExceptionHelper;
+import org.web.helper.ServiceExceptionHelper;
 import org.web.quartz.domain.BaseDO.DELETE;
 import org.web.quartz.domain.DateUtils;
 import org.web.quartz.domain.ResultHistoryDO;
@@ -71,7 +71,7 @@ public class HistoryController {
 			Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 			return gson.toJson(view);
 		} catch (ServiceException e) {
-			logger.error(ExceptionHelper.getExceptionInfo(e));
+			logger.error(ServiceExceptionHelper.getExceptionInfo(e));
 			if (ResultMessageEnum.ERROR_RECORD_NOT_EXIST.name().equals(e.getErrorCode())) {
 				view.setRows(new ArrayList<ResultHistoryDO>());
 				return new Gson().toJson(view);

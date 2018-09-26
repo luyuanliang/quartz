@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            Basic SearchBox - jQuery EasyUI Demo
+        </title>
+        <link rel="stylesheet" type="text/css" href="../easyui/themes/default/easyui.css">
+        <link rel="stylesheet" type="text/css" href="../easyui/themes/icon.css">
+        <link rel="stylesheet" type="text/css" href="../easyui/demo.css">
+        <script type="text/javascript" src="../easyui/jquery.min.js">
+        </script>
+        <script type="text/javascript" src="../easyui/jquery.easyui.min.js">
+        </script>
+        <script type="text/javascript" src="../easyui/jquery-1.11.3.js">
+        </script>
+        <script>
+            $(function() {
+                var $jQuery = jQuery.noConflict();
+                $(".datebox :text").attr("readonly", "readonly");
+                $('#addNewDialog').panel('close');
+                $("#updateDialog").panel('close');
+                $("#detailDialog").panel('close');
+            })
+
+			function getSelected(){
+					var row = $('#recordGrid').datagrid('getSelected');
+					if (row){
+						$.messager.alert('Info', row.itemid+":"+row.productid+":"+row.attr1);
+					}
+				}
+				
+			function getSelections(){
+				var ss = [];
+				var rows = $('#recordGrid').datagrid('getSelections');
+				for(var i=0; i<rows.length; i++){
+					var row = rows[i];
+					ss.push('<span>'+row.itemid+":"+row.productid+":"+row.attr1+'</span>');
+				}
+				$.messager.alert('Info', ss.join('<br/>'));
+			}
+
+            function searchRecords() {
+                $('#recordGrid').datagrid({
+                    loadMsg: '正在加载信息...',
+                    type: 'post',
+                    queryParams: {
+                        jobName: $('#jobName').val(),
+                        jobGroup: $('#jobGroup').val(),
+                        triggerType: $('#triggerType').val(),
+                        status: $('#status').val(),
+                    },
+                    url: '/quartz/member/queryJobList.do',
+                });
+
+            }
+
+            function deleteRecords() {
+                //var row = $('#recordGrid').datagrid('getSelections');
+                var ids = [];
+                var deleteIds = "";
+                var rows = $('#recordGrid').datagrid('getChecked');
+                for (var i = 0; i < rows.length; i++) {
+                    ids.push(rows[i].appJobId);
+                    if (i == 0) {
+                        deleteIds = rows[i].appJobId;
+                    } else {
+                        deleteIds = deleteIds + "," + rows[i].appJobId;
+                    }
+                }
+                if (ids == "") {
+                    alert("选一个啊！");
+                } else {
+                    var deleteAlert = ids.join('\n');
+                    deleteAlert = deleteAlert + "\n准备删除以上记录";
+                    //$.messager.alert("操作提示", deleteAlert,"WARNNING");
+                    alert(deleteAlert);
+                    $.messager.confirm("删除确认", "是否批量删除记录",
+                    function(r) {
+                        if (r) {
+                            var $jQuery = jQuery.noConflict();
+                            jQuery.ajax({
+                                type: 'POST',
+                                url: "/quartz/member/deleteJob.do",
+                                data: {
+                                    deletes: deleteIds
+                                },
+                                success: function(text) {
+                                    var ajaxResult = eval("(" + text + ")");
+                                    if (ajaxResult.result) {
+                                        delRows();
+                                    } else {
+                                        displayAjaxResult(ajaxResult);
+                                    }
+                                },
+                                error: function() {
+                                    $.messager.alert("操作提示", "删除失败", "ERROR");
+                                }
+                            });
+                        }
+                    });
+                } 
+            }
+
+            function addReordForm() {
+                var checkPass = $('#addNewForm').form('validate');
+                if (!checkPass) {
+                    return;
+                }
+
+                $.messager.confirm("新增确认", "是否新增记录",
+                function(r) {
+                    if (r) {
+                        var $jQuery = jQuery.noConflict();
+                        jQuery.ajax({
+                            type: 'POST',
+                            url: "/quartz/member/insertJob.do",
+                            data: {
+                                jobName: $('#jobName_addForm').val(),
+                                jobGroup: $('#jobGroup_addForm').val(),
+                                inputUser: $('#inputUser_addForm').val(),
+                                updateUser: $('#updateUser_addForm').val(),
+                                uri: $('#uri_addForm').val(),
+                                noticeErrorUri: $('#noticeErrorUri_addForm').val(),
+                                description: $('#description_addForm').val(),
+                                mapData: $('#mapData_addForm').val(),
+                                triggerType: $('#triggerType_addForm').val(),
+                                requestWay: $('#requestWay_addForm').val(),
+                                needLog: $('#needLog_addForm').val(),
+                                status: $('#status_addForm').val(),
+                                cron: $('#cron_addForm').val(),
+                                repeatCount: $('#repeatCount_addForm').val(),
+                                repeatInterval: $('#repeatInterval_addForm').val(),
+                                startTime: $('#startTime_addForm').datetimebox('getValue'),
+                                endTime: $('#endTime_addForm').datetimebox('getValue'),
+                            },
+                            success: function(text) {
+                                var ajaxResult = eval("(" + text + ")");
+                                displayAjaxResult(ajaxResult);
+                                $('#addNewDialog').panel('close');
+                            },
+                            error: function() {
+                                $.messager.alert("操作提示", "删除失败", "ERROR");
+                            }
+                        });
+                    }
+                });
+            }
+
+            function displayAjaxResult(ajaxResult) {
+                var title = ajaxResult.title;
+                var msg = ajaxResult.msg;
+                var type = ajaxResult.type;
+                if (title == null || title == "") {
+                    title = "操作提示";
+                }
+                if (type != "error") {} else if (type != "info") {} else {
+                    type = "warnning";
+                }
+                $.messager.alert(title, msg, type);
+            }
+
+            function delRows() {
+                var rows = $('#recordGrid').datagrid("getChecked");
+                for (var i = 0; i < rows.length; i++) {
+                    var index = $('#recordGrid').datagrid('getRowIndex', rows[i]);
+                    $('#recordGrid').datagrid('deleteRow', index);
+                }
+                //$('#recordGrid').datagrid('reload');
+            }
+
+            function onLoadSuccess(data) {
+                var rows = $('#recordGrid').datagrid("getRows");
+                for (var i = 0; i < rows.length; i++) {}
+            }
+
+            function formatOper(val, row, index) {
+                return ' <a class="Delete_Button" href="javascript:deleteOneRecord(\'' + row.appJobId + '\')"> 删除 </a> ' + ' <a class="Update_Button" href="javascript:selectOneRecordForUpdate(\'' + row.appJobId + '\')"> 修改 </a> ' + ' <a class="Query_Button" href="javascript:selectOneRecord(\'' + row.appJobId + '\')"> 查询 </a> '
+            }
+
+            function deleteOneRecord(row) {
+                $.messager.confirm("删除确认", "是否删除记录",
+                function(r) {
+                    if (r) {
+                        var $jQuery = jQuery.noConflict();
+                        jQuery.ajax({
+                            type: 'POST',
+                            url: "/quartz/member/deleteJob.do",
+                            data: {
+                                deletes: row
+                            },
+                            success: function(text) {
+                                var ajaxResult = eval("(" + text + ")");
+                                if (ajaxResult.result) {
+                                    $.messager.alert("操作提示", ajaxResult.msg, ajaxResult.type);
+                                    var rows = $('#recordGrid').datagrid("getRows");
+                                    for (var i = 0; i < rows.length; i++) {
+                                        if (row == rows[i].appJobId) {
+                                            var index = $('#recordGrid').datagrid('getRowIndex', rows[i]);
+                                            $('#recordGrid').datagrid('deleteRow', index);
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    $.messager.alert("操作提示", ajaxResult.msg, ajaxResult.type);
+                                }
+
+                            },
+                            error: function() {
+                                $.messager.alert("操作提示", "删除失败", "ERROR");
+                            }
+                        });
+                    }
+                });
+            }
+
+            function selectOneRecordForUpdate(primaryKey) {
+                var $jQuery = jQuery.noConflict();
+                jQuery.ajax({
+                    type: 'POST',
+                    url: "/quartz/member/queryJobDetail.do",
+                    data: {
+                        appJobId: primaryKey
+                    },
+                    success: function(text) {
+                        var ajaxResult = eval("(" + text + ")");
+                        if (ajaxResult.result != null) {
+                            displayAjaxResult(ajaxResult);
+                        } else {
+                            var ajaxResult = eval("(" + text + ")");
+                            $('#updateDialog').dialog("open");
+                            $('#updateForm').form('load', {
+                                appJobId_UpdateForm: ajaxResult.appJobId,
+                                jobName_UpdateForm: ajaxResult.jobName,
+                                jobGroup_UpdateForm: ajaxResult.jobGroup,
+                                uri_UpdateForm: ajaxResult.uri,
+                                description_UpdateForm: ajaxResult.description,
+                                mapData_UpdateForm: ajaxResult.mapData,
+                                triggerType_UpdateForm: ajaxResult.triggerType,
+                                requestWay_UpdateForm: ajaxResult.requestWay,
+                                requestWay_view_UpdateForm: ajaxResult.requestWay,
+                                status_UpdateForm: ajaxResult.status,
+                                cron_UpdateForm: ajaxResult.cron,
+                                repeatCount_UpdateForm: ajaxResult.repeatCount,
+                                repeatInterval_UpdateForm: ajaxResult.repeatInterval,
+                                prevFireTime_UpdateForm: ajaxResult.prevFireTime,
+                            });
+                        }
+                    },
+                    error: function() {
+                        $.messager.alert("操作提示", "查询记录失败", "ERROR");
+                    }
+                });
+            }
+
+            function updateOneRecord(primaryKey) {
+                var checkPass = $('#updateForm').form('validate');
+                if (!checkPass) {
+                    return;
+                }
+
+                $.messager.confirm("修改确认", "是否修改记录",
+                function(r) {
+                    if (r) {
+                        var $jQuery = jQuery.noConflict();
+                        jQuery.ajax({
+                            type: 'POST',
+                            url: "/quartz/member/updateJob.do",
+                            data: {
+                                uri: $('#uri_UpdateForm').val(),
+                                description: $('#description_UpdateForm').val(),
+                                mapData: $('#mapData_UpdateForm').val(),
+                                requestWay: $('#requestWay_UpdateForm').val(),
+                                cron: $('#cron_UpdateForm').val(),
+                                repeatCount: $('#repeatCount_UpdateForm').val(),
+                                repeatInterval: $('#repeatInterval_UpdateForm').val(),
+                                appJobId: $('#appJobId_UpdateForm').val()
+                            },
+                            success: function(text) {
+                                var ajaxResult = eval("(" + text + ")");
+                                displayAjaxResult(ajaxResult);
+                                $('#updateDialog').panel('close');
+                            },
+                            error: function() {
+                                $.messager.alert("操作提示", "修改失败", "ERROR");
+                            }
+                        });
+                    }
+                });
+
+            }
+
+            function selectOneRecord(primaryKey) {
+                var $jQuery = jQuery.noConflict();
+                jQuery.ajax({
+                    type: 'POST',
+                    url: "/quartz/member/queryJobDetail.do",
+                    data: {
+                        appJobId: primaryKey
+                    },
+                    success: function(text) {
+                        var ajaxResult = eval("(" + text + ")");
+                        if (ajaxResult.result != null) {
+                            displayAjaxResult(ajaxResult);
+                        } else {
+                            $('#detailDialog').dialog("open");
+                            $('#detailForm').form('load', {
+                                appJobId: ajaxResult.appJobId,
+                                jobName: ajaxResult.jobName,
+                                jobGroup: ajaxResult.jobGroup,
+                                inputUser: ajaxResult.inputUser,
+                                updateUser: ajaxResult.updateUser,
+                                uri: ajaxResult.uri,
+                                description: ajaxResult.description,
+                                mapData: ajaxResult.mapData,
+                                triggerType: ajaxResult.triggerType,
+                                requestWay: ajaxResult.requestWay,
+                                status: ajaxResult.status,
+                                cron: ajaxResult.cron,
+                                repeatCount: ajaxResult.repeatCount,
+                                repeatInterval: ajaxResult.repeatInterval,
+                                prevFireTime: ajaxResult.prevFireTime,
+                                nextFireTime: ajaxResult.nextFireTime,
+                                startTime: ajaxResult.startTime,
+                                endTime: ajaxResult.endTime,
+                                inputDate: ajaxResult.inputDate,
+                                updateDate: ajaxResult.updateDate,
+                            });
+                        }
+                    },
+                    error: function() {
+                        $.messager.alert("操作提示", "查询记录失败", "ERROR");
+                    }
+                });
+            }
+			
+			$(function () {
+				$(".panel-noscroll")
+					.css({
+						top: 0,
+						right: 0,
+						bottom: 0,
+						left: 0
+					});
+					
+				$(".panel.datagrid.easyui-fluid").css('width', '100%') 
+					.find('.panel-header').css('width', '100%').end()
+					.find('.datagrid-wrap.panel-body').css('width', '100%')
+					.find('.datagrid-view').css('width', '100%');
+			});
+			
+        </script>
+    </head>
+    
+    <body>
+        <div style="margin: 0px 0 0px 0; margin: 0px; position: absolute; top:0; right:0;bottom: 0; left: 0;">
+            <table id="recordGrid" class="easyui-datagrid" title="DataGrid Complex Toolbar"
+            style="width: 100%; height: 800px; padding: 0px; margin: 0 0 0 0;" data-options="rownumbers:true,onLoadSuccess: onLoadSuccess,remoteSort:false,checkOnSelect:false,pagination:true,singleSelect:false,url:'',method:'post',toolbar:'#condition',fit: true">
+                <thead>
+                    <tr>
+                        <th data-options="field:'ck',checkbox:true">
+                        </th>
+                        <th data-options="field:'jobName'" sortable="true" width="8%">
+                            任务名
+                        </th>
+                        <th data-options="field:'jobGroup'" sortable="true" width="8%">
+                            分组
+                        </th>
+                        <th data-options="field:'uri',width:50" sortable="true" width="10%">
+                            URI
+                        </th>
+                        <th data-options="field:'triggerType',width:50" sortable="true" width="8%">
+                            trigger类型
+                        </th>
+                        <th data-options="field:'status',width:50" sortable="true" width="8%">
+                            状态
+                        </th>                        
+                        <th data-options="field:'cron',width:50" sortable="true" width="10%">
+                            cron表达式
+                        </th>
+                        <th data-options="field:'prevFireTime',width:55" sortable="true" width="12%">
+                            上次时间
+                        </th>
+                        <th data-options="field:'nextFireTime',width:55" sortable="true" width="12%">
+                            下次时间
+                        </th>
+                        <th data-options="field:'inputDate',width:55" sortable="true" width="12%">
+                            创建时间
+                        </th>
+                        <th data-options="field:'appJobId',width:55,hidden:true" sortable="true"
+                        width="10%">
+                            PramaryKey
+                        </th>
+                        <th data-options="field:'operate',width:50,align:'center',formatter:formatOper"
+                        sortable="false" width="10%">
+                            操作
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+            <div id="condition" class="container_12" style="position: relative; padding: 0px;">
+                <div style="height: 10px;">
+                </div>
+                <span>
+                    任务名:
+                </span>
+                <input id="jobName" class="easyui-textbox" data-options="iconWidth:30,prompt:''"
+                style="width: 150px; padding: 2px;">
+                <span>
+                    分组:
+                </span>
+                <input id="jobGroup" class="easyui-textbox" data-options="iconWidth:30,prompt:''"
+                style="width: 150px; padding: 2px;">
+                <span>
+                    trigger类型:
+                </span>
+                <select id="triggerType" class="textbox combo" style="width: 150px; padding: 2px;">
+                		<option value="ALL">ALL</option>
+                        <option value="CRON">CRON</option>
+                        <option value="SIMPLE">SIMPLE</option>   
+                </select>
+                <span>
+                    状态:
+                </span>
+                <select id="status" class="textbox combo" style="width: 150px; padding: 2px;">
+                	<option value="ALL">ALL</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="OPEN">OPEN</option>
+                    <option value="PAUSED">PAUSED</option>
+                </select>
+                <div>
+                    <div style="height: 10px;">
+                    </div>
+                    <div>
+                        <a id="search" class="easyui-linkbutton" data-options="iconCls:'icon-search'"
+                        style="width: 80px;" onclick="searchRecords()">
+                            Search
+                        </a>
+                        <a id="cut" class="easyui-linkbutton" data-options="iconCls:'icon-cut'"
+                        style="width: 80px;" onclick="deleteRecords()">
+                            delete
+                        </a>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add'"
+                        onclick="$('#addNewDialog').dialog('open')" style="width: 85px;">
+                            新增记录
+                        </a>
+                        <span>选择模式: </span>
+						<select class="textbox combo" onchange="$('#recordGrid').datagrid({singleSelect:(this.value==0)})">
+							<option value="1">多行</option>
+							<option value="0">单行</option>
+						</select>
+                    </div>
+
+                </div>
+                <div style="height: 10px;">
+                </div>
+            </div>
+        </div>
+        <div id="addNewDialog" class="easyui-dialog" title="ADD NEW RECORD" data-options="iconCls:'icon-save',buttons:'#addDialogToolbar',modal:false"
+        style="width: 500px; height: 600px; padding: 10px">
+            <div style="padding: 10px 60px 20px 60px">
+                <center>
+                    <form id="addNewForm" method="post">
+                        <table>
+                            <tr>
+                                <td>
+                                    任务名:
+                                </td>
+                                <td>
+                                    <input id="jobName_addForm" class="easyui-textbox" data-options="required:true,iconWidth:30,prompt:''"
+                                    style="width: 200px; padding: 2px;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    分组:
+                                </td>
+                                <td>
+                                    <input id="jobGroup_addForm" class="easyui-textbox" data-options="required:true,iconWidth:30,prompt:''"
+                                    style="width: 200px; padding: 2px;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    URI:
+                                </td>
+                                <td>
+                                    <input id="uri_addForm" class="easyui-textbox" data-options="required:true,iconWidth:30,prompt:''"
+                                    style="width: 200px; padding: 2px;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    回调URI(当出现异常时):
+                                </td>
+                                <td>
+									<input id="noticeErrorUri_addForm" class="easyui-textbox" data-options="iconWidth:30,prompt:''"
+									style="width: 200px; padding: 2px;">                                    
+                                </td>
+                            </tr>                     
+                            <tr>
+                                <td>
+                                    描述:
+                                </td>
+                                <td>
+                                    <input id="description_addForm" class="easyui-textbox" data-options="multiline:true"
+                                    style="width:200px;height:60px">
+                                    </input>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    KEY-VALUE(POST请求生效):
+                                </td>
+                                <td>
+                                    <input id="mapData_addForm" class="easyui-textbox" data-options="multiline:true"
+                                    style="width:200px;height:60px">
+                                    </input>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    trigger类型:
+                                </td>
+                                <td>
+                                    <select id="triggerType_addForm" class="textbox combo" data-options="required:true" style="width: 200px; padding: 2px;">
+                                        <option value="CRON">CRON</option>
+                                        <option value="SIMPLE">SIMPLE</option>                                        
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    NEED LOG:
+                                </td>
+                                <td>
+                                    <select id="needLog_addForm" class="textbox combo" style="width: 200px; padding: 2px;">
+                                        <option value="Y">Y</option>
+                                        <option value="N">N</option>
+                                    </select>
+                                </td>
+                            </tr>                            
+                            <tr>
+                                <td>
+                                    HTTP:
+                                </td>
+                                <td>
+                                    <select id="requestWay_addForm" class="textbox combo" style="width: 200px; padding: 2px;">
+                                        <option value="GET">GET</option>
+                                        <option value="POST">POST</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    cron表达式:
+                                </td>
+                                <td>
+                                    <input id="cron_addForm" class="easyui-textbox" data-options="iconWidth:30,prompt:''"
+                                    style="width: 200px; padding: 2px;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    总次数:
+                                </td>
+                                <td>
+                                    <input id="repeatCount_addForm" class="easyui-textbox" data-options="iconWidth:30,prompt:''"
+                                    style="width: 200px; padding: 2px;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    执行间隔:
+                                </td>
+                                <td>
+                                    <input id="repeatInterval_addForm" class="easyui-textbox" data-options="iconWidth:30,prompt:''"
+                                    style="width: 200px; padding: 2px;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    开始时间:
+                                </td>
+                                <td>
+                                    <input id="startTime_addForm" class="easyui-datetimebox" data-options="required:true"
+                                    style="width: 200px; padding: 2px;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    结束时间:
+                                </td>
+                                <td>
+                                    <input id="endTime_addForm" class="easyui-datetimebox" data-options=""
+                                    style="width: 200px; padding: 2px;">
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </center>
+            </div>
+        </div>
+        <div id="addDialogToolbar" style="text-align: center; padding: 5px">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="addReordForm()">
+                新增
+            </a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="$('#addNewForm').form('clear')">
+                Clear
+            </a>
+        </div>
+        <div id="updateDialog" class="easyui-dialog" title="Update Record" style="width:500px;height:500px;text-align:center"
+        data-options="iconCls:'icon-save',resizable:true,buttons:'#udpateDialogToolbar',modal:true">
+            <!-- <iframe scrolling="auto" frameborder="0" src="insertUser.do" style="width:100%;height:100%;"></iframe>
+            -->
+            <center>
+                <form id="updateForm" method="post">
+                    <table>
+                        <tr>
+                            <td>
+                                主键:
+                            </td>
+                            <td>
+                                <input name="appJobId_UpdateForm" id="appJobId_UpdateForm" class="easyui-textbox"
+                                data-options="disabled:true" type="text">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                trigger类型:
+                            </td>
+                            <td>
+                                <input name="triggerType_UpdateForm" id="triggerType_UpdateForm" class="easyui-textbox"
+                                data-options="disabled:true" type="text">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                	状态:
+                            </td>
+                            <td>
+                                <input name="status_UpdateForm" id="triggerType_UpdateForm" class="easyui-textbox"
+                                data-options="disabled:true" type="text">
+                                </input>
+                            </td>
+                        </tr>                        
+                        <tr>
+                            <td>
+                                上次时间:
+                            </td>
+                            <td>
+                                <input name="prevFireTime_UpdateForm" id="prevFireTime_UpdateForm" class="easyui-textbox"
+                                data-options="disabled:true" type="text">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                任务名:
+                            </td>
+                            <td>
+                                <input name="jobName_UpdateForm" id="jobName_UpdateForm" class="easyui-textbox"
+                                data-options="disabled:true,iconWidth:30,prompt:''" style="width: 150px; padding: 2px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                分组:
+                            </td>
+                            <td>
+                                <input name="jobGroup_UpdateForm" id="jobGroup_UpdateForm" class="easyui-textbox"
+                                data-options="disabled:true,iconWidth:30,prompt:''" style="width: 150px; padding: 2px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                URI:
+                            </td>
+                            <td>
+                                <input name="uri_UpdateForm" id="uri_UpdateForm" class="easyui-textbox"
+                                data-options="iconWidth:30,prompt:''" style="width: 150px; padding: 2px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                描述:
+                            </td>
+                            <td>
+                                <input name="description_UpdateForm" id="description_UpdateForm" class="easyui-textbox"
+                                data-options="multiline:true" style="height:60px">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                KEY-VALUE:
+                            </td>
+                            <td>
+                                <input name="mapData_UpdateForm" id="mapData_UpdateForm" class="easyui-textbox"
+                                data-options="multiline:true" style="height:60px">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                HTTP:
+                            </td>
+                            <td>
+                                <select id="requestWay_UpdateForm" class="textbox combo" style="width: 150px; padding: 2px;">
+                                		<option value=""></option>
+                                        <option value="GET">GET</option>
+                                        <option value="POST">POST</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                cron表达式:
+                            </td>
+                            <td>
+                                <input name="cron_UpdateForm" id="cron_UpdateForm" class="easyui-textbox"
+                                data-options="iconWidth:30,prompt:''" style="width: 150px; padding: 2px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                总次数:
+                            </td>
+                            <td>
+                                <input name="repeatCount_UpdateForm" id="repeatCount_UpdateForm" class="easyui-textbox"
+                                data-options="iconWidth:30,prompt:''" style="width: 150px; padding: 2px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                执行间隔:
+                            </td>
+                            <td>
+                                <input name="repeatInterval_UpdateForm" id="repeatInterval_UpdateForm"
+                                class="easyui-textbox" data-options="iconWidth:30,prompt:''" style="width: 150px; padding: 2px;">
+                            </td>
+                        </tr>
+                        <tr hidden=true>
+                            <td>
+                                userId:
+                            </td>
+                            <td>
+                                <input name="appJobId_UpdateForm" id="appJobId_UpdateForm" class="easyui-textbox"
+                                data-options="disabled:true" type="text">
+                                </input>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </center>
+        </div>
+        <div id="udpateDialogToolbar">
+            <center>
+                <a href="#" class="easyui-linkbutton" onclick="updateOneRecord()">
+                    保存
+                </a>
+                <a href="#" class="easyui-linkbutton" onclick="$('#updateDialog').dialog('close')">
+                    关闭
+                </a>
+            </center>
+        </div>
+        <div id="detailDialog" class="easyui-dialog" title="Query Detail Record"
+        style="width:500px;height:620px;text-align:center" data-options="iconCls:'icon-save',resizable:true,buttons:'#detailDialogToolbar',modal:true">
+            <center>
+                <form id="detailForm" method="post">
+                    <table>
+                        <tr>
+                            <td>
+                                主键:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="appJobId">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                任务名:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="jobName">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                分组:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="jobGroup">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                创建人:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="inputUser">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                               修改人:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="updateUser">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                URI:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="uri">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                描述:
+                            </td>
+                            <td>
+                                <input name="description" class="easyui-textbox"
+                                data-options="multiline:true,disabled:true" style="height:60px">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                KEY-VALUE:
+                            </td>
+                            <td>
+                                 <input name="mapData" class="easyui-textbox"
+                                data-options="multiline:true,disabled:true" style="height:60px">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                trigger类型:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="triggerType">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                HTTP:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="requestWay">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                cron表达式:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="cron">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                总次数:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="repeatCount">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                执行间隔:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="repeatInterval">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                上次时间:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="prevFireTime">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                下次时间:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="nextFireTime">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                开始时间:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="startTime">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                结束时间:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="endTime">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                创建时间:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="inputDate">
+                                </input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                修改时间:
+                            </td>
+                            <td>
+                                <input class="easyui-textbox" data-options="disabled:true" type="text"
+                                name="updateDate">
+                                </input>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </center>
+        </div>
+        <div id="detailDialogToolbar">
+            <center>
+                <a href="#" class="easyui-linkbutton" onclick="$('#detailDialog').dialog('close')">
+                    关闭
+                </a>
+            </center>
+        </div>
+    </body>

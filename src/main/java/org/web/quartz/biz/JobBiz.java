@@ -32,6 +32,7 @@ public class JobBiz {
 	@Resource
 	private AppJobService appJobService;
 
+
 	@Resource
 	private ResultHistoryService resultHistoryService;
 

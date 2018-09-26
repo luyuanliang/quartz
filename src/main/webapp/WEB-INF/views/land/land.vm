@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Basic Form - jQuery EasyUI Demo</title>
+		<link rel="stylesheet" type="text/css" href="../quartz/easyui/themes/default/easyui.css">
+        <link rel="stylesheet" type="text/css" href="../quartz/easyui/themes/icon.css">
+        <link rel="stylesheet" type="text/css" href="../quartz/easyui/demo.css">
+        <script type="text/javascript" src="../quartz/easyui/jquery.min.js">
+        </script>
+        <script type="text/javascript" src="../quartz/easyui/jquery.easyui.min.js">
+        </script>
+        <script type="text/javascript" src="../quartz/easyui/jquery-1.11.3.js">
+        </script>
+        
+		<script>
+		 $(function() {
+	                var $jQuery = jQuery.noConflict();
+	            })
+		
+		function submitForm() {
+			var $jQuery = jQuery.noConflict();
+			jQuery.ajax({
+				type: 'POST',
+				url: "/quartz/checkLand.do",
+				data: {
+				   password: $('#passWord').val(),
+				   memberName: $('#memberName').val(),
+				},
+				success: function(text) {
+					var ajaxResult = eval("(" + text + ")");
+					if (ajaxResult.result) {
+                    	window.location.href="/quartz/main.html"
+                    } else {
+                        $.messager.alert("操作提示", ajaxResult.msg, ajaxResult.type);
+                    }
+				},
+				error: function() {
+					$.messager.alert("操作提示", "登陆失败", "ERROR");
+				}
+			});
+		}
+			
+	   function displayAjaxResult(ajaxResult) {
+			var title = ajaxResult.title;
+			var msg = ajaxResult.msg;
+			var type = ajaxResult.type;
+			if (title == null || title == "") {
+				title = "操作提示";
+			}
+			if (type != "error") {} else if (type != "info") {} else {
+				type = "warnning";
+			}
+			$.messager.alert(title, msg, type);
+		}
+
+		function clearForm(){
+			$('#ff').form('clear');
+		}
+		</script>        
+</head>
+<body>
+	<div class="easyui-panel" title="New Topic" style="width:400px">
+		<div style="padding:10px 60px 20px 60px">
+	    <form id="ff" method="post">
+	    	<table cellpadding="5">
+	    		<tr>
+	    			<td>MemberName:</td>
+	    			<td><input class="easyui-textbox" type="text" id="memberName" data-options="required:true"></input></td>
+	    		</tr>
+	    		<tr>
+	    			<td>Password:</td>
+	    			<td><input class="easyui-textbox" type="text" id="passWord" data-options="required:true"></input></td>
+	    		</tr>	    		
+	    	</table>
+	    </form>
+	    <div style="text-align:center;padding:5px">
+	    	<a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">Submit</a>
+	    	<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()">Clear</a>
+	    </div>
+	    </div>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+	"memberGroupId":"memberGroupId",
+	"jobGroup":"jobGroup",
+	"memberId":"memberId",
+	"memberName":"memberName",
+	"description":"description",
+	"reason":"reason",
+	"inputUser":"inputUser",
+	"updateUser":"updateUser",
+	"inputDate":"2016-02-09 10:10:10",
+	"updateDate":"2016-02-09 10:10:10",
+	"updateVersion":"updateVersion",
+	"isDelete":"isDelete",
+}
+
